@@ -22,16 +22,25 @@
 
 @implementation XBoundlessScrollView
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)init
 {
-    self = [super initWithFrame:frame];
+    self = [super init];
     if (self) {
-        [self initView];
+        [self baseInit];
     }
     return self;
 }
 
-- (void)initView
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self baseInit];
+    }
+    return self;
+}
+
+- (void)baseInit
 {
     self.bounces = NO;
     self.pagingEnabled = YES;
@@ -39,6 +48,7 @@
     self.showsVerticalScrollIndicator = NO;
     self.showsHorizontalScrollIndicator = NO;
     [self setContentOffset:CGPointMake(kSelfWidth, 0)];
+    self.scrollInterval = 3.f;
 }
 
 - (void)setShowViews:(NSArray *)showViews
@@ -63,7 +73,7 @@
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapClick)];
     [self addGestureRecognizer:tap];
     self.currentIndex = 0;
-    self.scrollInterval = 3.f;
+    [self resetTimer];
 }
 
 #pragma mark - UIScrollViewDelegate
@@ -114,24 +124,12 @@
     }
 }
 
-#pragma mark - private
+#pragma mark - setter
 
 - (void)setScrollInterval:(NSTimeInterval)scrollInterval
 {
     _scrollInterval = scrollInterval;
-    [self.scrollTimer invalidate];
-    self.scrollTimer = nil;
-    if (self.subviews.count < 2) {
-        return;
-    }
-    __weak typeof(self) weakself = self;
-    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:scrollInterval repeats:YES block:^(NSTimer * _Nonnull timer) {
-        __strong typeof(weakself) strongself = weakself;
-        CGPoint point = strongself.contentOffset;
-        point.x += kSelfWidth;
-        [strongself setContentOffset:point animated:YES];
-    }];
-    [[NSRunLoop mainRunLoop] addTimer:self.scrollTimer forMode:NSRunLoopCommonModes];
+    [self resetTimer];
 }
 
 - (void)setCurrentIndex:(NSInteger)currentIndex
@@ -144,6 +142,25 @@
     for (int i = 0; i < 3; i++) {
         [self bringShowViewToFront:i];
     }
+}
+
+#pragma mark - private
+
+- (void)resetTimer
+{
+    [self.scrollTimer invalidate];
+    self.scrollTimer = nil;
+    if (self.subviews.count < 2 || self.scrollInterval <= 0) {
+        return;
+    }
+    __weak typeof(self) weakself = self;
+    self.scrollTimer = [NSTimer scheduledTimerWithTimeInterval:self.scrollInterval repeats:YES block:^(NSTimer * _Nonnull timer) {
+        __strong typeof(weakself) strongself = weakself;
+        CGPoint point = strongself.contentOffset;
+        point.x += kSelfWidth;
+        [strongself setContentOffset:point animated:YES];
+    }];
+    [[NSRunLoop mainRunLoop] addTimer:self.scrollTimer forMode:NSRunLoopCommonModes];
 }
 
 - (void)scrollViewDidChanged:(UIScrollView *)scrollView
