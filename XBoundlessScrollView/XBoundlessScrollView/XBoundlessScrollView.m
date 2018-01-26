@@ -44,7 +44,7 @@
 {
     self.bounces = NO;
     self.pagingEnabled = YES;
-    self.delegate = self;
+    [self setValue:self forKey:@"delegate"];
     self.showsVerticalScrollIndicator = NO;
     self.showsHorizontalScrollIndicator = NO;
     [self setContentOffset:CGPointMake(kSelfWidth, 0)];

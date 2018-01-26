@@ -21,5 +21,7 @@ typedef NS_ENUM(NSUInteger, CHDLQBoundlessBlockType) {
 @property (nonatomic, strong) NSArray<UIView *> *showViews;
 /**< 滚动到到某个页面或者点击的时候的回调*/
 @property (nonatomic, copy) void(^boundlessBlock)(CHDLQBoundlessBlockType blockType, NSInteger index);
+/**< 设置delegate会使相关方法失灵 暂时不支持设置delegate*/
+- (void)setDelegate:(id<UIScrollViewDelegate>)delegate __attribute__((unavailable("delegate暂时不允许使用")));
 
 @end
